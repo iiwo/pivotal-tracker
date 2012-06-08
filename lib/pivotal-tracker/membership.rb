@@ -26,7 +26,7 @@ module PivotalTracker
     end
 
     def delete
-      Client.connection["/projects/#{project_id}/mamberships/#{id}"].delete
+      Client.connection["/projects/#{project_id}/memberships/#{id}"].delete
     end
 
     def debug
