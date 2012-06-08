@@ -25,6 +25,10 @@ module PivotalTracker
       return new_membership
     end
 
+    def delete
+      Client.connection["/projects/#{project_id}/stories/#{id}"].delete
+    end
+
     def debug
       self.to_xml
     end
