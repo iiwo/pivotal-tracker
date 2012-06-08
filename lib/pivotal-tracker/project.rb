@@ -3,8 +3,17 @@ module PivotalTracker
     include HappyMapper
 
     class << self
+      @@cached_memberships = {}
+
       def all
-        @found = parse(Client.connection['/projects'].get)
+        @xml = Client.connection['/projects'].get
+        @@cached_memberships = {}
+        Hash.from_xml(@xml)['projects'].each do |project|
+          @@cached_memberships[project['id']] = project['memberships'].map do |membership|
+            PivotalTracker::Membership.parse({:membership=>membership}.to_xml(:skip_types => true)).first
+          end
+        end
+        @found = parse(@xml)
       end
 
       def find(id)
@@ -22,6 +31,7 @@ module PivotalTracker
     element :week_start_day, String
     element :point_scale, String
     element :labels, String
+    element :public, Boolean
     element :velocity_scheme, String
     element :iteration_length, Integer
     element :initial_velocity, Integer
@@ -55,6 +65,10 @@ module PivotalTracker
 
     def memberships
       @memberships ||= Proxy.new(self, Membership)
+    end
+
+    def cached_memberships
+      @@cached_memberships[self.id]
     end
 
     def iteration(group)
